@@ -12,11 +12,11 @@ using std::pair;
 using std::strcmp;
 using std::string;
 
-/*
+
 struct strComp {
-   bool operator()(const char* a, const char* b) const {
-      return strcmp(a, b) < 0;
-   }
+    bool operator()(const char* a, const char* b) const {
+        return strcmp(a, b) < 0;
+    }
 };
 
 int main() {
@@ -28,23 +28,19 @@ int main() {
             break;
         }
 
-        char id[13];
-        char ip[16];
+        char id[20][13];
+        char ip[20][16];
         typedef map<char*, char*, strComp> myMap;
         myMap ipId;
         myMap mainMJ;
         for ( int i = 0; i < n; i++ ) {
-            cin >> id >> ip;
+            cin >> id[i] >> ip[i];
 
-            if ( ipId.find(ip) == ipId.end() ) {
-                ipId[ip] = id;
+            if ( ipId.find(ip[i]) == ipId.end() ) {
+                ipId[ip[i]] = id[i];
             } else {
-                mainMJ[ipId[ip]] = id;
+                mainMJ[ipId[ip[i]]] = id[i];
             }
-        }
-        
-        for ( myMap::iterator ita = ipId.begin(); ita != ipId.end(); ++ita ) {
-            cout << ita->first << " " << ita->second << endl;
         }
 
         myMap::iterator it = mainMJ.begin();
@@ -54,14 +50,8 @@ int main() {
         cout << endl;
     }
 }
-*/
 
-struct strComp {
-    bool operator()(const char* a, const char* b) const {
-        return strcmp(a, b) < 0;
-    }
-};
-
+/*
 int main() {
     // freopen("a.txt", "r", stdin);
 
@@ -93,3 +83,4 @@ int main() {
         cout << endl;
     }
 }
+*/
