@@ -1,6 +1,7 @@
 #include<iostream>
 #include<cmath>
 #include<algorithm>
+#include<cstdlib>
 using namespace std;
 
 bool isPrime(long long n) {
@@ -8,7 +9,11 @@ bool isPrime(long long n) {
         return true;
     }
 
-    for ( int i = 2; i <= sqrt(n); ++i ) {
+    if ( n % 2 == 0 ) {
+        return false;
+    }
+
+    for ( int i = 3; i <= sqrt(n); i += 2 ) {
         if ( n % i == 0 ) {
             return false;
         }
@@ -17,10 +22,16 @@ bool isPrime(long long n) {
 }
 
 void factor(long long num) {
-    int a[15];
+    long long a[15];
     int count = 0;
+    while ( num % 2 == 0 ) {
+        a[count] = 2;
+        ++count;
+        num /= 2;
+    }
+
     while ( !isPrime(num) ) {
-        for ( int i = 2; i <= sqrt(num); ++i ) {
+        for ( int i = 3; i <= sqrt(num); i += 2 ) {
             if ( num % i == 0 ) {
                 a[count] = i;
                 ++count;
@@ -42,7 +53,10 @@ int main() {
     int n;
     cin >> n;
 
-    int count = 0;
+    if ( n > 59 ) {
+        n = 59;
+    }
+
     for ( int i = 2; i <= n; i++ ) {
         long long num = pow(2, i) - 1;
         if ( isPrime(i) && !isPrime(num) ) {
