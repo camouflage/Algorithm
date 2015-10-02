@@ -1,7 +1,7 @@
 #include<iostream>
 #include<cmath>
 #include<algorithm>
-#include<cstdlib>
+#include<cstdio>
 using namespace std;
 
 bool isPrime(long long n) {
@@ -64,4 +64,5 @@ int main() {
             cout << num << " = ( 2 ^ " << i << " ) - 1" << endl;
         }
     }
+
 }
