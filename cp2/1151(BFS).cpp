@@ -1,14 +1,17 @@
+// Sicily 1151 魔板
 #include<iostream>
 #include<queue>
 #include<string>
 #include<cstdio>
 using namespace std;
 
+// 用结构体保存8个数码的状态和已经完成的操作符
 struct state {
-    short num[8];
+    short num[8]; // 用short节省内存使用
     string op;
 };
 
+// A操作：将上下两行调换
 struct state opa(struct state& input) {
     struct state temp;
     for ( int i = 0; i < 4; ++i ) {
@@ -21,6 +24,7 @@ struct state opa(struct state& input) {
     return temp;
 }
 
+// B操作：将最右边的数移到最左边，其它的数右移
 struct state opb(struct state& input) {
     struct state temp;
     temp.num[0] = input.num[3];
@@ -33,6 +37,7 @@ struct state opb(struct state& input) {
     return temp;
 }
 
+// C操作：将中间的四个数顺时针旋转一格
 struct state opc(struct state& input) {
     struct state temp;
     temp.num[0] = input.num[0];
@@ -48,7 +53,9 @@ struct state opc(struct state& input) {
     return temp;
 }
 
+// 康托展开
 int cantor(short a[]) {
+    // 分别对应7!到0!
     int factorial[8] = {5040, 720, 120, 24, 6, 2, 1, 1};
     bool b[8];
     for ( int i = 0; i < 8; ++i ) {
@@ -56,8 +63,12 @@ int cantor(short a[]) {
     }
     int can = 0;
 
+    /* 
+     * 从第一个数开始遍历，计算比该数小且尚未出现的数的个数，
+     * 并与权值(i!)相乘，即可得到康托展开的值
+     */
     for ( int i = 0; i < 8; ++i ) {
-        int count = 0;
+        int count = 0; // 比a[i]小且尚未出现的数的个数
         for ( int j = 0; j < a[i] - 1; ++j ) {
             if ( b[j] == 0 ) {
                 ++count;
@@ -83,26 +94,29 @@ int main() {
         scanf("%hd%hd%hd%hd%hd%hd%hd%hd", &final.num[0], &final.num[1], &final.num[2], &final.num[3],
 				&final.num[4], &final.num[5], &final.num[6], &final.num[7]);
         
+        // 设定初始的结构体
         for ( int i = 0; i < 4; ++i ) {
             init.num[i] = i + 1;
             init.num[i + 4] = 8 - i;
         }
         init.op = "";
 
-        queue<struct state> q;
-        bool visit[40320];
-        int flag = 0;
+        queue<struct state> q; // 队列储存state信息
+        bool visit[40320]; // 用于排除重复，由于只有8个数，一共只有8!种排列
+        int flag = 0; // 储存是否能在规定步数(n)内得到结果
         q.push(init);
         for ( int i = 0; i < 40320; ++i ) {
             visit[i] = 0;
         }
 		visit[cantor(init.num)] = 1;
 		
+        // BFS
         while ( !q.empty() ) {
             struct state front = q.front();
 			q.pop();
 
             int equal = 1;
+            // 判断该state是否与所期望的相同
             for ( int i = 0; i < 8; ++i ) {
                 if ( front.num[i] != final.num[i] ) {
                     equal = 0;
@@ -110,12 +124,14 @@ int main() {
                 }
             }
 
+            // 如果相同，则跳出循环
             if ( equal == 1 ) {
                 final = front;
                 flag = 1;
                 break;
             }
 
+            // 判断是否超出规定步数(n)
             if ( front.op.length() > n ) {
                 break;
             }
@@ -123,6 +139,7 @@ int main() {
             struct state temp;
 			int can;
 
+            // A操作，并判断得到的结果是否出现过，如未则标记后压入栈中
             temp = opa(front);
 			can = cantor(temp.num);
             if ( visit[can] == 0 ) {
@@ -130,6 +147,7 @@ int main() {
                 q.push(temp);
             }
 
+            // B操作
             temp = opb(front);
 			can = cantor(temp.num);
             if ( visit[can] == 0 ) {
@@ -137,6 +155,7 @@ int main() {
                 q.push(temp);
             }
 
+            // C操作
             temp = opc(front);
 			can = cantor(temp.num);
             if ( visit[can] == 0 ) {
@@ -145,6 +164,7 @@ int main() {
             }
         }
 
+        // 如果成功找到移动方案，则输出步数和操作序列，否则输出-1
         if ( flag ) {
             cout << final.op.length() << " " << final.op << endl;
 
