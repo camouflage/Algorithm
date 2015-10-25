@@ -9,79 +9,22 @@
 #include<iostream>
 using namespace std;
 
-const unsigned int T[] = {
-    0xd76aa478,  /* T1 */
-    0xe8c7b756,  /* T2 */
-    0x242070db,  /* T3 */
-    0xc1bdceee,  /* T4 */
-    0xf57c0faf,  /* T5 */
-    0x4787c62a,  /* T6 */
-    0xa8304613,  /* T7 */
-    0xfd469501,  /* T8 */
-    0x698098d8,  /* T9 */
-    0x8b44f7af,  /* T10 */
-    0xffff5bb1,  /* T11 */
-    0x895cd7be,  /* T12 */
-    0x6b901122,  /* T13 */
-    0xfd987193,  /* T14 */
-    0xa679438e,  /* T15 */
-    0x49b40821,  /* T16 */
-    0xf61e2562,  /* T17 */
-    0xc040b340,  /* T18 */
-    0x265e5a51,  /* T19 */
-    0xe9b6c7aa,  /* T20 */
-    0xd62f105d,  /* T21 */
-    0x02441453,  /* T22 */
-    0xd8a1e681,  /* T23 */
-    0xe7d3fbc8,  /* T24 */
-    0x21e1cde6,  /* T25 */
-    0xc33707d6,  /* T26 */
-    0xf4d50d87,  /* T27 */
-    0x455a14ed,  /* T28 */
-    0xa9e3e905,  /* T29 */
-    0xfcefa3f8,  /* T30 */
-    0x676f02d9,  /* T31 */
-    0x8d2a4c8a,  /* T32 */
-    0xfffa3942,  /* T33 */
-    0x8771f681,  /* T34 */
-    0x6d9d6122,  /* T35 */
-    0xfde5380c,  /* T36 */
-    0xa4beea44,  /* T37 */
-    0x4bdecfa9,  /* T38 */
-    0xf6bb4b60,  /* T39 */
-    0xbebfbc70,  /* T40 */
-    0x289b7ec6,  /* T41 */
-    0xeaa127fa,  /* T42 */
-    0xd4ef3085,  /* T43 */
-    0x04881d05,  /* T44 */
-    0xd9d4d039,  /* T45 */
-    0xe6db99e5,  /* T46 */
-    0x1fa27cf8,  /* T47 */
-    0xc4ac5665,  /* T48 */
-    0xf4292244,  /* T49 */
-    0x432aff97,  /* T50 */
-    0xab9423a7,  /* T51 */
-    0xfc93a039,  /* T52 */
-    0x655b59c3,  /* T53 */
-    0x8f0ccc92,  /* T54 */
-    0xffeff47d,  /* T55 */
-    0x85845dd1,  /* T56 */
-    0x6fa87e4f,  /* T57 */
-    0xfe2ce6e0,  /* T58 */
-    0xa3014314,  /* T59 */
-    0x4e0811a1,  /* T60 */
-    0xf7537e82,  /* T61 */
-    0xbd3af235,  /* T62 */
-    0x2ad7d2bb,  /* T63 */
-    0xeb86d391,  /* T64 */
-};
-
-const unsigned int s[] = {
-    7, 12, 17, 22,
-    5, 9, 14, 20,
-    4, 11, 16, 23,
-    6, 10, 15, 21
-};
+#define S11 7
+#define S12 12
+#define S13 17
+#define S14 22
+#define S21 5
+#define S22 9
+#define S23 14
+#define S24 20
+#define S31 4
+#define S32 11
+#define S33 16
+#define S34 23
+#define S41 6
+#define S42 10
+#define S43 15
+#define S44 21
 
 unsigned int F(unsigned int x, unsigned int y, unsigned int z) {
     return (x & y) | (~x & z);
@@ -101,10 +44,38 @@ unsigned int I(unsigned int x, unsigned int y, unsigned int z) {
 
 unsigned int shiftLeft(unsigned int x, int n) {
     return ( (x << n) | (x >> (32 - n)) );
+}
 
+void FF(unsigned int& a, unsigned int b, unsigned int c, unsigned d,\
+    unsigned int x, int s, unsigned int t) {
+    a = (a + F(b, c, d) + x + t);
+    a = shiftLeft(a, s) + b;
+}
+
+void GG(unsigned int& a, unsigned int b, unsigned int c, unsigned d,\
+    unsigned int x, int s, unsigned int t) {
+    a = (a + G(b, c, d) + x + t);
+    a = shiftLeft(a, s) + b;
+}
+
+void HH(unsigned int& a, unsigned int b, unsigned int c, unsigned d,\
+    unsigned int x, int s, unsigned int t) {
+    a = (a + H(b, c, d) + x + t);
+    a = shiftLeft(a, s) + b;
+}
+
+void II(unsigned int& a, unsigned int b, unsigned int c, unsigned d,\
+    unsigned int x, int s, unsigned int t) {
+    a = (a + I(b, c, d) + x + t);
+    a = shiftLeft(a, s) + b;
 }
 
 int main() {
+    if ( sizeof(long) != 8 || sizeof(unsigned int) != 4 ) {
+        printf("Size of long or unsigned int is different in your machine,\
+            the result will not be correct!");
+    }
+
     // http://www.cplusplus.com/reference/cstdio/fread/?kw=fread
     FILE *fp;
     long fSize;
@@ -134,18 +105,12 @@ int main() {
         buffer[size++] = 0;
     }
 
+    fSize *= 8;
     // append original length in bits mod to message
     memcpy(buffer + size, (int*) &fSize, sizeof(int));
     size += 4;
     memcpy(buffer + size, (int*) &fSize + 1, sizeof(int));
     size += 4;
-
-    
-    printf("%ld\n", size);
-    for ( int i = 0; i < size; ++i ) {
-        printf("%u ", buffer[i]); 
-    }
-    
 
     // Init MD Buffer
     unsigned int a = 0x67452301;
@@ -153,19 +118,102 @@ int main() {
     unsigned int c = 0x98badcfe;
     unsigned int d = 0x10325476;
     
-    unsigned char x[16];
+    unsigned int x[16];
     for ( int i = 0; i < size / 64; ++i ) {
-        unsigned aa = a;
-        unsigned bb = b;
-        unsigned cc = c;
-        unsigned dd = d;
 
-        for ( int j = 0; j < 16; ++j ) {
-            x[j] = buffer[i * 16 + j];
+        for ( int j = 0, step = i * 64 + 0; j < 16; ++j, step += 4 ) {
+            x[j] = buffer[step + 0] + (buffer[step + 1] << 8) + (buffer[step + 2] << 16) + (buffer[step + 3] << 24);
         }
 
-        a = b + ((a + F(b, c, d) + x)
+        unsigned int aa = a;
+        unsigned int bb = b;
+        unsigned int cc = c;
+        unsigned int dd = d;
+
+        /* Round 1 */
+        FF (a, b, c, d, x[ 0], S11, 0xd76aa478); /* 1 */
+        FF (d, a, b, c, x[ 1], S12, 0xe8c7b756); /* 2 */
+        FF (c, d, a, b, x[ 2], S13, 0x242070db); /* 3 */
+        FF (b, c, d, a, x[ 3], S14, 0xc1bdceee); /* 4 */
+        FF (a, b, c, d, x[ 4], S11, 0xf57c0faf); /* 5 */
+        FF (d, a, b, c, x[ 5], S12, 0x4787c62a); /* 6 */
+        FF (c, d, a, b, x[ 6], S13, 0xa8304613); /* 7 */
+        FF (b, c, d, a, x[ 7], S14, 0xfd469501); /* 8 */
+        FF (a, b, c, d, x[ 8], S11, 0x698098d8); /* 9 */
+        FF (d, a, b, c, x[ 9], S12, 0x8b44f7af); /* 10 */
+        FF (c, d, a, b, x[10], S13, 0xffff5bb1); /* 11 */
+        FF (b, c, d, a, x[11], S14, 0x895cd7be); /* 12 */
+        FF (a, b, c, d, x[12], S11, 0x6b901122); /* 13 */
+        FF (d, a, b, c, x[13], S12, 0xfd987193); /* 14 */
+        FF (c, d, a, b, x[14], S13, 0xa679438e); /* 15 */
+        FF (b, c, d, a, x[15], S14, 0x49b40821); /* 16 */
+
+        /* Round 2 */
+        GG (a, b, c, d, x[ 1], S21, 0xf61e2562); /* 17 */
+        GG (d, a, b, c, x[ 6], S22, 0xc040b340); /* 18 */
+        GG (c, d, a, b, x[11], S23, 0x265e5a51); /* 19 */
+        GG (b, c, d, a, x[ 0], S24, 0xe9b6c7aa); /* 20 */
+        GG (a, b, c, d, x[ 5], S21, 0xd62f105d); /* 21 */
+        GG (d, a, b, c, x[10], S22,  0x2441453); /* 22 */
+        GG (c, d, a, b, x[15], S23, 0xd8a1e681); /* 23 */
+        GG (b, c, d, a, x[ 4], S24, 0xe7d3fbc8); /* 24 */
+        GG (a, b, c, d, x[ 9], S21, 0x21e1cde6); /* 25 */
+        GG (d, a, b, c, x[14], S22, 0xc33707d6); /* 26 */
+        GG (c, d, a, b, x[ 3], S23, 0xf4d50d87); /* 27 */
+        GG (b, c, d, a, x[ 8], S24, 0x455a14ed); /* 28 */
+        GG (a, b, c, d, x[13], S21, 0xa9e3e905); /* 29 */
+        GG (d, a, b, c, x[ 2], S22, 0xfcefa3f8); /* 30 */
+        GG (c, d, a, b, x[ 7], S23, 0x676f02d9); /* 31 */
+        GG (b, c, d, a, x[12], S24, 0x8d2a4c8a); /* 32 */
+
+        /* Round 3 */
+        HH (a, b, c, d, x[ 5], S31, 0xfffa3942); /* 33 */
+        HH (d, a, b, c, x[ 8], S32, 0x8771f681); /* 34 */
+        HH (c, d, a, b, x[11], S33, 0x6d9d6122); /* 35 */
+        HH (b, c, d, a, x[14], S34, 0xfde5380c); /* 36 */
+        HH (a, b, c, d, x[ 1], S31, 0xa4beea44); /* 37 */
+        HH (d, a, b, c, x[ 4], S32, 0x4bdecfa9); /* 38 */
+        HH (c, d, a, b, x[ 7], S33, 0xf6bb4b60); /* 39 */
+        HH (b, c, d, a, x[10], S34, 0xbebfbc70); /* 40 */
+        HH (a, b, c, d, x[13], S31, 0x289b7ec6); /* 41 */
+        HH (d, a, b, c, x[ 0], S32, 0xeaa127fa); /* 42 */
+        HH (c, d, a, b, x[ 3], S33, 0xd4ef3085); /* 43 */
+        HH (b, c, d, a, x[ 6], S34,  0x4881d05); /* 44 */
+        HH (a, b, c, d, x[ 9], S31, 0xd9d4d039); /* 45 */
+        HH (d, a, b, c, x[12], S32, 0xe6db99e5); /* 46 */
+        HH (c, d, a, b, x[15], S33, 0x1fa27cf8); /* 47 */
+        HH (b, c, d, a, x[ 2], S34, 0xc4ac5665); /* 48 */
+
+        /* Round 4 */
+        II (a, b, c, d, x[ 0], S41, 0xf4292244); /* 49 */
+        II (d, a, b, c, x[ 7], S42, 0x432aff97); /* 50 */
+        II (c, d, a, b, x[14], S43, 0xab9423a7); /* 51 */
+        II (b, c, d, a, x[ 5], S44, 0xfc93a039); /* 52 */
+        II (a, b, c, d, x[12], S41, 0x655b59c3); /* 53 */
+        II (d, a, b, c, x[ 3], S42, 0x8f0ccc92); /* 54 */
+        II (c, d, a, b, x[10], S43, 0xffeff47d); /* 55 */
+        II (b, c, d, a, x[ 1], S44, 0x85845dd1); /* 56 */
+        II (a, b, c, d, x[ 8], S41, 0x6fa87e4f); /* 57 */
+        II (d, a, b, c, x[15], S42, 0xfe2ce6e0); /* 58 */
+        II (c, d, a, b, x[ 6], S43, 0xa3014314); /* 59 */
+        II (b, c, d, a, x[13], S44, 0x4e0811a1); /* 60 */
+        II (a, b, c, d, x[ 4], S41, 0xf7537e82); /* 61 */
+        II (d, a, b, c, x[11], S42, 0xbd3af235); /* 62 */
+        II (c, d, a, b, x[ 2], S43, 0x2ad7d2bb); /* 63 */
+        II (b, c, d, a, x[ 9], S44, 0xeb86d391); /* 64 */
+
+        a += aa;
+        b += bb;
+        c += cc;
+        d += dd;
     }
+
+    unsigned int abcd[4] = {a, b, c, d};
+    for ( int i = 0; i < 4; ++i ) {
+        printf("%02x%02x%02x%02x", abcd[i] << 24 >> 24,\
+            abcd[i] << 16 >> 24, abcd[i] << 8 >> 24, abcd[i] >> 24);
+    }
+    cout << endl;
     
     fclose(fp);
     free(buffer);
