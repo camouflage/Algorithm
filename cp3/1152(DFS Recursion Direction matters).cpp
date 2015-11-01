@@ -18,6 +18,7 @@ void DFS(struct pos init, bool visit[5][6], int v[30], bool& flag, int& count) {
 	
 	if ( count == 30 ) {
 		flag = 1;
+		return;
 	}
 	
 	/* Direction choosing is quite tricky.
@@ -36,10 +37,8 @@ void DFS(struct pos init, bool visit[5][6], int v[30], bool& flag, int& count) {
 		}
 	}
 	
-	if ( flag == 0 ) {
-		visit[init.x][init.y] = 0;
-		--count;
-	}
+	visit[init.x][init.y] = 0;
+	--count;
 }
 
 int main() {
