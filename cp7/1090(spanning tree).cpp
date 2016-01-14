@@ -1,6 +1,7 @@
 #include<iostream>
 #include<algorithm>
 #include<cstring>
+#include<vector>
 using namespace std;
 
 struct edge {
@@ -35,6 +36,7 @@ bool cmp(const struct edge a, const struct edge b) {
     return a.len < b.len;
 }
 
+/* Kruskal
 int main() {
     // freopen("a.txt", "r", stdin);
     int t;
@@ -76,6 +78,68 @@ int main() {
                 break;
             }
         }
+
+        if ( t != 0 ) {
+            cout << endl;
+        }
+    }
+}
+*/
+
+/* Prim */
+int main() {
+    // freopen("a.txt", "r", stdin);
+    int t;
+    cin >> t;
+    while ( t-- ) {
+        int n;
+        cin >> n;
+        int a[500][500];
+        for ( int i = 0; i < n; ++i ) {
+            for ( int j = 0; j < n; ++j ) {
+                cin >> a[i][j];
+            }
+        }
+
+        bool visit[500];
+        memset(visit, 0, sizeof(visit));
+        int dist[500];
+        for ( int i = 0; i < n; ++i ) {
+            dist[i] = a[0][i];
+        }
+
+        vector<int> edge;
+        visit[0] = 1;
+        for ( int i = 0; i < n - 1; ++i ) {
+            int pos;
+            int min = 1 << 30;
+            for ( int j = 0; j < n; j++ ) {
+                if ( visit[j] == 0 && dist[j] < min ) {
+                    pos = j;
+                    min = dist[j];
+                }
+            }
+
+            edge.push_back(min);
+            visit[pos] = 1;
+
+            for ( int j = 0; j < n; ++j ) {
+                if ( visit[j] == 0 && a[pos][j] < dist[j] ) {
+                    dist[j] = a[pos][j];
+                }
+            }
+        }
+
+        int total = 0;
+        int maxEdge = -1;
+        for ( int i = 0; i < edge.size(); ++i ) {
+            total += edge[i];
+            if ( edge[i] > maxEdge ) {
+                maxEdge = edge[i];
+            }
+        }
+
+        cout << maxEdge << endl;
 
         if ( t != 0 ) {
             cout << endl;
